@@ -6,6 +6,9 @@ function App() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [searchTerm, setSearchTerm] = useState('')
+  const [statusFilter, setStatusFilter] = useState('')
+  const [riskFilter, setRiskFilter] = useState('')
+  const [paymentMethodFilter, setPaymentMethodFilter] = useState('')
 
   useEffect(() => {
     const fetchTransactions = async () => {
@@ -30,11 +33,31 @@ function App() {
     fetchTransactions()
   }, [])
 
-  const filteredTransactions = transactions.filter((transaction) =>
-    transaction.transaction_id
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase())
-  )
+const filteredTransactions = transactions.filter((transaction) => {
+  const matchesSearch = transaction.transaction_id
+    .toLowerCase()
+    .includes(searchTerm.toLowerCase())
+
+  const matchesStatus =
+  statusFilter === '' ||
+  transaction.status.toLowerCase() === statusFilter.toLowerCase()
+
+const matchesRisk =
+  riskFilter === '' ||
+  transaction.risk_classification.toLowerCase() === riskFilter.toLowerCase()
+
+const matchesPaymentMethod =
+  paymentMethodFilter === '' ||
+  transaction.payment_method.toLowerCase() ===
+    paymentMethodFilter.toLowerCase()
+
+return (
+  matchesSearch &&
+  matchesStatus &&
+  matchesRisk &&
+  matchesPaymentMethod
+)
+})
 
   const suspiciousCount = transactions.filter(
     (transaction) =>
@@ -61,7 +84,35 @@ function App() {
         value={searchTerm}
         onChange={(event) => setSearchTerm(event.target.value)}
       />
+<select
+  value={statusFilter}
+  onChange={(event) => setStatusFilter(event.target.value)}
+>
+  <option value="">All Statuses</option>
+  <option value="successful">Successful</option>
+  <option value="failed">Failed</option>
+  <option value="pending">Pending</option>
+  <option value="reversed">Reversed</option>
+</select>
 
+<select
+  value={riskFilter}
+  onChange={(event) => setRiskFilter(event.target.value)}
+>
+  <option value="">All Risk Levels</option>
+  <option value="normal">Normal</option>
+  <option value="suspicious">Suspicious</option>
+</select>
+<select
+  value={paymentMethodFilter}
+  onChange={(event) => setPaymentMethodFilter(event.target.value)}
+>
+  <option value="">All Payment Channels</option>
+  <option value="card">Card</option>
+  <option value="upi">UPI</option>
+  <option value="bank_transfer">Bank Transfer</option>
+  <option value="wallet">Wallet</option>
+</select>
       {loading && <p>Loading transactions...</p>}
 
       {error && <p>Error: {error}</p>}
